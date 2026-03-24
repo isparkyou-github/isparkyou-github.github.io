@@ -165,14 +165,14 @@
 
   const towerData = [
     { x: 0.04, scale: 0.65, label: '2012', variant: 'small' },
-    { x: 0.14, scale: 0.75, label: '2014', variant: 'medium' },
-    { x: 0.27, scale: 0.85, label: '2016', variant: 'medium' },
-    { x: 0.40, scale: 1.0,  label: '2018', variant: 'large' },
-    { x: 0.53, scale: 1.1,  label: '2020', variant: 'large' },
-    { x: 0.66, scale: 1.05, label: '2022', variant: 'medium' },
-    { x: 0.78, scale: 0.9,  label: '2023', variant: 'medium' },
-    { x: 0.90, scale: 0.75, label: '2025', variant: 'small' },
-    { x: 1.00, scale: 0.65, label: '今', variant: 'small' },
+    { x: 0.16, scale: 0.75, label: '2014', variant: 'medium' },
+    { x: 0.28, scale: 0.85, label: '2016', variant: 'medium' },
+    { x: 0.38, scale: 1.0,  label: '2018', variant: 'large' },
+    /* -- Gap for Scroll Hint at 0.5 -- */
+    { x: 0.62, scale: 1.1,  label: '2020', variant: 'large' },
+    { x: 0.72, scale: 1.05, label: '2022', variant: 'medium' },
+    { x: 0.84, scale: 0.9,  label: '2023', variant: 'medium' },
+    { x: 0.94, scale: 0.75, label: '2025', variant: 'small' },
   ];
 
   function buildTowerSVG(variant, color) {
