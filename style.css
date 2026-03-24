@@ -255,6 +255,45 @@ body {
   color: var(--text-secondary);
 }
 
+/* Language-specific Hierarchies */
+.lang-en .name-en {
+  font-size: clamp(2.5rem, 8vw, 5.5rem);
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  background: linear-gradient(135deg, #ffffff 0%, var(--accent-glow) 50%, var(--accent3) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.1;
+}
+
+.lang-en .name-cn {
+  font-size: clamp(1rem, 3vw, 1.8rem);
+  font-weight: 400;
+  letter-spacing: 0.3em;
+  background: none;
+  -webkit-text-fill-color: var(--text-secondary);
+  color: var(--text-secondary);
+  order: 2; /* Move it below the English name if needed */
+}
+
+.lang-zh .name-cn {
+  order: 1;
+}
+
+.lang-zh .name-en {
+  order: 2;
+}
+
+.hero-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 1rem;
+  animation: fadeInDown 0.7s ease 0.1s both;
+}
+
 .hero-subtitle {
   font-size: clamp(0.9rem, 2vw, 1.1rem);
   color: var(--text-secondary);
