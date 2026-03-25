@@ -526,10 +526,23 @@ section {
 }
 
 .about-intro {
-  font-size: 1.1rem;
-  line-height: 1.9;
-  margin-bottom: 1.2rem;
-  color: var(--text-primary);
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: var(--text);
+  margin-bottom: 1.5rem;
+}
+
+.about-quote {
+  border-left: 3px solid var(--accent);
+  padding-left: 1.2rem;
+  font-size: 1.05rem;
+  font-style: italic;
+  color: var(--accent);
+  background: rgba(59, 139, 255, 0.05);
+  padding-top: 0.8rem;
+  padding-bottom: 0.8rem;
+  border-radius: 0 8px 8px 0;
+  margin: 1.5rem 0;
 }
 
 .about-text p {
