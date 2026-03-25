@@ -976,6 +976,100 @@ section {
   font-weight: 500;
 }
 
+/* ===== HOBBIES SECTION ===== */
+.hobbies {
+  background: linear-gradient(180deg, transparent 0%, rgba(7, 21, 37, 0.5) 50%, transparent 100%);
+}
+
+.hobbies-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.5rem;
+  margin-top: 3rem;
+}
+
+.hobby-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  backdrop-filter: blur(20px);
+  cursor: default;
+  transition: all 0.35s ease;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.hobby-item.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.hobby-item:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 24px rgba(59, 139, 255, 0.35);
+  transform: translateY(-6px);
+  background: rgba(10, 30, 70, 0.95);
+}
+
+.hobby-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  background: rgba(59, 139, 255, 0.08);
+  border-radius: 14px;
+  padding: 10px;
+  transition: all 0.35s ease;
+}
+
+.hobby-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.hobby-item:hover .hobby-icon {
+  color: var(--accent3);
+  background: rgba(64, 224, 255, 0.12);
+  box-shadow: 0 0 16px rgba(64, 224, 255, 0.3);
+  transform: scale(1.15);
+}
+
+.hobby-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.04em;
+  text-align: center;
+  transition: color 0.3s ease;
+}
+
+.hobby-item:hover .hobby-label {
+  color: var(--text-primary);
+}
+
+@media (max-width: 900px) {
+  .hobbies-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .hobbies-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  .hobby-item {
+    padding: 1.5rem 0.8rem;
+  }
+}
+
 /* ===== CERTIFICATIONS SECTION ===== */
 .certs {
   background: linear-gradient(180deg, transparent 0%, rgba(7, 21, 37, 0.6) 50%, transparent 100%);

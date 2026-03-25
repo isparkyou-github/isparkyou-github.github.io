@@ -175,6 +175,26 @@
     { x: 0.94, scale: 0.75, label: '2025', variant: 'small' },
   ];
 
+  /* Insulator positions in each variant's SVG coordinate system
+     Used to compute exact wire attach points after CSS scaleY transform */
+  const variantGeo = {
+    small:  { w: 40, h: 100, tl: { x: 6, y: 28 },  tr: { x: 34, y: 28 },  ml: { x: 10, y: 48 }, mr: { x: 30, y: 48 } },
+    medium: { w: 52, h: 120, tl: { x: 2, y: 30 },  tr: { x: 50, y: 30 },  ml: { x: 7, y: 52 },  mr: { x: 45, y: 52 } },
+    large:  { w: 70, h: 160, tl: { x: 0, y: 36 },  tr: { x: 70, y: 36 },  ml: { x: 6, y: 62 },  mr: { x: 64, y: 62 } },
+  };
+
+  /* Energy infrastructure elements placed between towers */
+  const infraData = [
+    { x: 0.10, type: 'solar',      scale: 0.7 },
+    { x: 0.22, type: 'wind',       scale: 0.85 },
+    { x: 0.33, type: 'factory',    scale: 0.65 },
+    { x: 0.46, type: 'substation', scale: 0.8 },
+    { x: 0.54, type: 'powerplant', scale: 0.75 },
+    { x: 0.67, type: 'wind',       scale: 0.65 },
+    { x: 0.78, type: 'factory',    scale: 0.55 },
+    { x: 0.89, type: 'solar',      scale: 0.6 },
+  ];
+
   function buildTowerSVG(variant, color) {
     const c = color || '#60a0e0';
     if (variant === 'small') {
@@ -221,7 +241,6 @@
         <circle cx="40" cy="72" r="2" fill="${c}"/>
       </svg>`;
     } else {
-      // large
       return `<svg viewBox="0 0 70 160" fill="none" xmlns="http://www.w3.org/2000/svg" width="70" height="160">
         <line x1="35" y1="2" x2="35" y2="160" stroke="${c}" stroke-width="3"/>
         <line x1="0" y1="36" x2="70" y2="36" stroke="${c}" stroke-width="3"/>
@@ -250,21 +269,125 @@
     }
   }
 
-  function getWireAttachPoints(tower, sceneW, sceneH) {
-    const tW = tower.dataset.twidth | 0;
-    const tH = tower.dataset.theight | 0;
-    const xC = parseFloat(tower.dataset.xratio) * sceneW;
-    const yBase = sceneH;
-    const scale = parseFloat(tower.dataset.scale);
+  /* ── Infrastructure SVG builders ── */
+  function buildInfraSVG(type) {
+    const c = '#4a7ab5';
+    const cg = '#3a9a5a'; // green accent for solar/wind
+    switch (type) {
 
-    // Top wire attachment point
-    const top = { x: xC, y: yBase - tH * scale + 5 };
-    // Mid wire attachment points
-    const midY = yBase - tH * scale * 0.55;
-    const midW = (tW * 0.48 * scale);
-    const left = { x: xC - midW, y: midY };
-    const right = { x: xC + midW, y: midY };
-    return { top, left, right };
+      case 'solar': // Solar panel array
+        return `<svg viewBox="0 0 70 45" width="70" height="45" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Stand -->
+          <line x1="20" y1="30" x2="20" y2="45" stroke="${c}" stroke-width="1.5"/>
+          <line x1="50" y1="30" x2="50" y2="45" stroke="${c}" stroke-width="1.5"/>
+          <!-- Panel 1 (tilted) -->
+          <polygon points="2,18 30,10 30,28 2,36" stroke="${c}" stroke-width="1.2" fill="rgba(59,139,255,0.08)"/>
+          <line x1="10" y1="15" x2="10" y2="33" stroke="${c}" stroke-width="0.6" opacity="0.5"/>
+          <line x1="18" y1="13" x2="18" y2="31" stroke="${c}" stroke-width="0.6" opacity="0.5"/>
+          <line x1="4" y1="27" x2="28" y2="19" stroke="${c}" stroke-width="0.6" opacity="0.5"/>
+          <!-- Panel 2 -->
+          <polygon points="35,15 68,6 68,24 35,33" stroke="${c}" stroke-width="1.2" fill="rgba(59,139,255,0.08)"/>
+          <line x1="45" y1="12" x2="45" y2="30" stroke="${c}" stroke-width="0.6" opacity="0.5"/>
+          <line x1="55" y1="9" x2="55" y2="27" stroke="${c}" stroke-width="0.6" opacity="0.5"/>
+          <line x1="38" y1="24" x2="65" y2="15" stroke="${c}" stroke-width="0.6" opacity="0.5"/>
+          <!-- Sun reflection -->
+          <circle cx="60" cy="3" r="1.5" fill="#f0c040" opacity="0.6"/>
+        </svg>`;
+
+      case 'wind': // Wind turbine
+        return `<svg viewBox="0 0 40 90" width="40" height="90" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Mast -->
+          <line x1="20" y1="12" x2="20" y2="90" stroke="${c}" stroke-width="2"/>
+          <!-- Base -->
+          <line x1="12" y1="90" x2="28" y2="90" stroke="${c}" stroke-width="2"/>
+          <!-- Nacelle -->
+          <rect x="17" y="10" width="8" height="5" rx="1" stroke="${c}" stroke-width="1.2" fill="rgba(59,139,255,0.1)"/>
+          <!-- Hub -->
+          <circle cx="20" cy="12" r="2.5" fill="${c}"/>
+          <!-- Blade 1 (up) -->
+          <path d="M20 12 L18 0 Q20 -2 22 0 Z" fill="${c}" opacity="0.7"/>
+          <!-- Blade 2 (lower right) -->
+          <path d="M20 12 L30 20 Q32 18 28 16 Z" fill="${c}" opacity="0.5"/>
+          <!-- Blade 3 (lower left) -->
+          <path d="M20 12 L10 20 Q8 18 12 16 Z" fill="${c}" opacity="0.5"/>
+        </svg>`;
+
+      case 'substation': // Substation / transformer yard
+        return `<svg viewBox="0 0 60 45" width="60" height="45" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Fence / boundary -->
+          <rect x="2" y="12" width="56" height="33" rx="2" stroke="${c}" stroke-width="1.2" fill="rgba(59,139,255,0.05)"/>
+          <!-- Transformer 1 -->
+          <rect x="8" y="20" width="14" height="20" rx="1" stroke="${c}" stroke-width="1.2" fill="rgba(59,139,255,0.1)"/>
+          <!-- Coil symbol -->
+          <path d="M12 25 Q15 23 15 27 Q15 31 12 29" stroke="${c}" stroke-width="1" fill="none"/>
+          <path d="M18 25 Q15 23 15 27 Q15 31 18 29" stroke="${c}" stroke-width="1" fill="none"/>
+          <!-- Transformer 2 -->
+          <rect x="28" y="22" width="12" height="18" rx="1" stroke="${c}" stroke-width="1.2" fill="rgba(59,139,255,0.1)"/>
+          <!-- Busbar -->
+          <line x1="5" y1="12" x2="5" y2="5" stroke="${c}" stroke-width="1.5"/>
+          <line x1="55" y1="12" x2="55" y2="5" stroke="${c}" stroke-width="1.5"/>
+          <line x1="5" y1="5" x2="55" y2="5" stroke="${c}" stroke-width="1.8"/>
+          <!-- Insulator dots -->
+          <circle cx="5" cy="5" r="2" fill="${c}"/>
+          <circle cx="30" cy="5" r="2" fill="${c}"/>
+          <circle cx="55" cy="5" r="2" fill="${c}"/>
+          <!-- Lightning rod -->
+          <line x1="30" y1="5" x2="30" y2="0" stroke="#f0c040" stroke-width="1"/>
+          <circle cx="30" cy="0" r="1" fill="#f0c040" opacity="0.8"/>
+        </svg>`;
+
+      case 'factory': // Industrial factory
+        return `<svg viewBox="0 0 65 50" width="65" height="50" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Main building -->
+          <rect x="5" y="18" width="40" height="32" stroke="${c}" stroke-width="1.2" fill="rgba(59,139,255,0.06)"/>
+          <!-- Roof / saw-tooth -->
+          <polygon points="5,18 15,8 25,18 35,8 45,18" stroke="${c}" stroke-width="1.2" fill="rgba(59,139,255,0.04)"/>
+          <!-- Windows -->
+          <rect x="10" y="28" width="6" height="6" stroke="${c}" stroke-width="0.8" fill="rgba(240,192,64,0.15)"/>
+          <rect x="20" y="28" width="6" height="6" stroke="${c}" stroke-width="0.8" fill="rgba(240,192,64,0.15)"/>
+          <rect x="30" y="28" width="6" height="6" stroke="${c}" stroke-width="0.8" fill="rgba(240,192,64,0.15)"/>
+          <!-- Chimney -->
+          <rect x="48" y="5" width="8" height="45" stroke="${c}" stroke-width="1.2" fill="rgba(59,139,255,0.08)"/>
+          <!-- Smoke -->
+          <path d="M52 5 Q50 0 54 -2 Q56 -4 52 -5" stroke="${c}" stroke-width="0.8" opacity="0.4" fill="none"/>
+          <!-- Door -->
+          <rect x="15" y="38" width="8" height="12" rx="1" stroke="${c}" stroke-width="0.8" fill="rgba(59,139,255,0.1)"/>
+        </svg>`;
+
+      case 'powerplant': // Cooling tower / power plant
+        return `<svg viewBox="0 0 55 55" width="55" height="55" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Cooling tower 1 (hyperbolic shape) -->
+          <path d="M5 55 Q5 30, 12 25 Q15 23, 15 20 L15 8 Q12 6 10 8 L10 3 Q15 0 20 0 Q25 0 25 3 L25 8 Q23 6 20 8 L20 20 Q20 23, 23 25 Q30 30, 30 55 Z" stroke="${c}" stroke-width="1.2" fill="rgba(59,139,255,0.06)"/>
+          <!-- Cooling tower 2 (smaller, behind) -->
+          <path d="M28 55 Q28 35, 34 30 Q36 28, 36 25 L36 15 Q40 12 44 15 L44 25 Q44 28, 46 30 Q52 35, 52 55 Z" stroke="${c}" stroke-width="1" fill="rgba(59,139,255,0.04)" opacity="0.7"/>
+          <!-- Steam from tower 1 -->
+          <path d="M17 0 Q14 -5, 18 -7 Q22 -9, 19 -12" stroke="rgba(143,173,214,0.4)" stroke-width="1" fill="none"/>
+          <!-- Steam from tower 2 -->
+          <path d="M40 12 Q37 8, 41 6 Q44 3, 40 1" stroke="rgba(143,173,214,0.3)" stroke-width="0.8" fill="none"/>
+          <!-- Base pipe -->
+          <line x1="0" y1="55" x2="55" y2="55" stroke="${c}" stroke-width="1.5"/>
+        </svg>`;
+
+      default: return '';
+    }
+  }
+
+  /* ── Precise wire attachment point calculation ──
+     Converts SVG-space insulator coordinates to scene-space,
+     accounting for CSS scaleY transform with bottom-center origin.
+     scene_x = centerX - svgWidth/2 + insulator_x
+     scene_y = sceneH  - (svgHeight - insulator_y) * cssScale */
+  function getWireAttachPoints(towerIndex, sceneW, sceneH) {
+    const td = towerData[towerIndex];
+    const geo = variantGeo[td.variant];
+    const centerX = td.x * sceneW;
+
+    return {
+      left:  { x: centerX - geo.w / 2 + geo.tl.x, y: sceneH - (geo.h - geo.tl.y) * td.scale },
+      right: { x: centerX - geo.w / 2 + geo.tr.x, y: sceneH - (geo.h - geo.tr.y) * td.scale },
+      midL:  { x: centerX - geo.w / 2 + geo.ml.x, y: sceneH - (geo.h - geo.ml.y) * td.scale },
+      midR:  { x: centerX - geo.w / 2 + geo.mr.x, y: sceneH - (geo.h - geo.mr.y) * td.scale },
+    };
   }
 
   function buildHeroScene() {
@@ -273,39 +396,33 @@
     const sceneW = scene.offsetWidth;
     const sceneH = scene.offsetHeight;
 
-    const towerEls = [];
+    /* ── Place infrastructure elements (behind towers, z-index lower) ── */
+    infraData.forEach(inf => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'infra-el';
+      wrapper.style.cssText = `position:absolute;bottom:0;left:${inf.x * sceneW}px;transform:translateX(-50%) scale(${inf.scale});transform-origin:bottom center;opacity:0.55;pointer-events:none;`;
+      wrapper.innerHTML = buildInfraSVG(inf.type);
+      container.appendChild(wrapper);
+    });
 
-    towerData.forEach((td, i) => {
+    /* ── Place towers ── */
+    towerData.forEach((td) => {
       const isLarge = td.scale >= 1.0;
       const color = isLarge ? '#5ba3ff' : '#4a88cc';
-
       const wrapper = document.createElement('div');
       wrapper.className = 'tower-el';
       wrapper.style.left = (td.x * sceneW) + 'px';
       wrapper.style.transform = `translateX(-50%) scaleY(${td.scale})`;
       wrapper.style.transformOrigin = 'bottom center';
-      wrapper.dataset.xratio = td.x;
-      wrapper.dataset.scale = td.scale;
-
-      const html = buildTowerSVG(td.variant, color);
-      wrapper.innerHTML = html;
-
-      const svgEl = wrapper.querySelector('svg');
-      const tw = parseInt(svgEl.getAttribute('width'));
-      const th = parseInt(svgEl.getAttribute('height'));
-      wrapper.dataset.twidth = tw;
-      wrapper.dataset.theight = th;
-
+      wrapper.innerHTML = buildTowerSVG(td.variant, color);
       container.appendChild(wrapper);
-      towerEls.push(wrapper);
     });
 
-    // After adding, draw wires via SVG
+    /* ── SVG overlay for wires ── */
     svg.setAttribute('width', sceneW);
     svg.setAttribute('height', sceneH);
     svg.setAttribute('viewBox', `0 0 ${sceneW} ${sceneH}`);
 
-    // Defs for gradients and filters
     const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
     defs.innerHTML = `
       <filter id="wireGlow" x="-20%" y="-20%" width="140%" height="140%">
@@ -320,51 +437,50 @@
     `;
     svg.appendChild(defs);
 
-    // Draw wires between adjacent towers
-    for (let i = 0; i < towerEls.length - 1; i++) {
-      const t1 = towerEls[i];
-      const t2 = towerEls[i + 1];
-      const p1 = getWireAttachPoints(t1, sceneW, sceneH);
-      const p2 = getWireAttachPoints(t2, sceneW, sceneH);
+    /* ── Draw catenary wires connecting tower insulators ── */
+    for (let i = 0; i < towerData.length - 1; i++) {
+      const p1 = getWireAttachPoints(i, sceneW, sceneH);
+      const p2 = getWireAttachPoints(i + 1, sceneW, sceneH);
 
-      // Top wire
-      drawCatenary(svg, p1.top, p2.top, 18, 'url(#wireGrad)', 1.8, true);
-      // Left-Right wires
-      drawCatenary(svg, p1.left, p2.left, 12, '#1e4880', 1.2, false);
-      drawCatenary(svg, p1.right, p2.right, 12, '#1e4880', 1.2, false);
+      // Top crossarm wires (left-to-left and right-to-right)
+      drawCatenary(svg, p1.left, p2.left, 16, 'url(#wireGrad)', 1.6, true);
+      drawCatenary(svg, p1.right, p2.right, 16, 'url(#wireGrad)', 1.6, true);
+      // Mid crossarm wires
+      drawCatenary(svg, p1.midL, p2.midL, 10, '#1e4880', 1.0, false);
+      drawCatenary(svg, p1.midR, p2.midR, 10, '#1e4880', 1.0, false);
     }
 
-    // Animated electricity spark on wires
-    animateSparks(towerEls, sceneW, sceneH);
+    /* ── Animated spark ── */
+    animateSparks(sceneW, sceneH);
   }
 
   function drawCatenary(svgEl, p1, p2, sag, stroke, width, glow) {
     const mx = (p1.x + p2.x) / 2;
     const my = Math.max(p1.y, p2.y) + sag;
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    const d = `M ${p1.x},${p1.y} Q ${mx},${my} ${p2.x},${p2.y}`;
-    path.setAttribute('d', d);
+    path.setAttribute('d', `M ${p1.x},${p1.y} Q ${mx},${my} ${p2.x},${p2.y}`);
     path.setAttribute('fill', 'none');
     path.setAttribute('stroke', stroke);
     path.setAttribute('stroke-width', width);
     if (glow) path.setAttribute('filter', 'url(#wireGlow)');
     path.setAttribute('stroke-linecap', 'round');
     svgEl.appendChild(path);
-    return path;
   }
 
-  function animateSparks(towers, sceneW, sceneH) {
-    if (towers.length < 2) return;
+  function animateSparks(sceneW, sceneH) {
+    if (towerData.length < 2) return;
 
     function createSpark() {
-      const i = Math.floor(Math.random() * (towers.length - 1));
-      const t1 = towers[i];
-      const t2 = towers[i + 1];
-      const p1 = getWireAttachPoints(t1, sceneW, sceneH).top;
-      const p2 = getWireAttachPoints(t2, sceneW, sceneH).top;
+      const i = Math.floor(Math.random() * (towerData.length - 1));
+      const p1 = getWireAttachPoints(i, sceneW, sceneH);
+      const p2 = getWireAttachPoints(i + 1, sceneW, sceneH);
 
-      const mx = (p1.x + p2.x) / 2;
-      const my = Math.max(p1.y, p2.y) + 18;
+      // Pick a random wire (left or right)
+      const useLeft = Math.random() > 0.5;
+      const a = useLeft ? p1.left : p1.right;
+      const b = useLeft ? p2.left : p2.right;
+      const mx = (a.x + b.x) / 2;
+      const my = Math.max(a.y, b.y) + 16;
 
       const spark = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
       spark.setAttribute('r', '2.5');
@@ -372,15 +488,13 @@
       spark.setAttribute('filter', 'url(#wireGlow)');
       svg.appendChild(spark);
 
-      let t = 0;
       const dur = 1200 + Math.random() * 800;
       const start = performance.now();
 
       function step(now) {
-        t = Math.min((now - start) / dur, 1);
-        // Quadratic Bezier position
-        const x = (1 - t) * (1 - t) * p1.x + 2 * (1 - t) * t * mx + t * t * p2.x;
-        const y = (1 - t) * (1 - t) * p1.y + 2 * (1 - t) * t * my + t * t * p2.y;
+        const t = Math.min((now - start) / dur, 1);
+        const x = (1 - t) * (1 - t) * a.x + 2 * (1 - t) * t * mx + t * t * b.x;
+        const y = (1 - t) * (1 - t) * a.y + 2 * (1 - t) * t * my + t * t * b.y;
         spark.setAttribute('cx', x);
         spark.setAttribute('cy', y);
         spark.setAttribute('opacity', 1 - Math.abs(t - 0.5) * 0.6);
@@ -564,7 +678,7 @@
   }, { threshold: 0.15 });
 
   const animEls = document.querySelectorAll(
-    '.timeline-item, .edu-card, .skill-category, .contact-card, .cert-card'
+    '.timeline-item, .edu-card, .skill-category, .hobby-item, .contact-card, .cert-card'
   );
 
   animEls.forEach((el, i) => {
