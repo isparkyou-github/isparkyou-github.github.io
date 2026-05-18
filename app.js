@@ -139,7 +139,8 @@
   const links = document.querySelector('.nav-links');
   if (toggle) {
     toggle.addEventListener('click', () => {
-      const isOpen = links.style.display === 'flex';
+      const isOpen = toggle.classList.contains('open');
+      toggle.classList.toggle('open', !isOpen);
       links.style.cssText = isOpen
         ? ''
         : 'display:flex;flex-direction:column;position:absolute;top:70px;left:0;right:0;background:rgba(5,13,26,0.98);padding:1.5rem;gap:1.5rem;border-bottom:1px solid rgba(60,139,255,0.2)';
@@ -149,7 +150,10 @@
   // Close mobile menu on link click
   document.querySelectorAll('.nav-links a').forEach(link => {
     link.addEventListener('click', () => {
-      if (links.style.display === 'flex') links.style.cssText = '';
+      if (toggle.classList.contains('open')) {
+        toggle.classList.remove('open');
+        links.style.cssText = '';
+      }
     });
   });
 })();

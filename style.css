@@ -130,6 +130,17 @@ body {
   transition: all 0.3s ease;
 }
 
+.nav-toggle.open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.nav-toggle.open span:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+.nav-toggle.open span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
 /* ===== HERO SECTION ===== */
 .lang-btn {
   display: inline-flex;
@@ -528,7 +539,7 @@ section {
 .about-intro {
   font-size: 1.15rem;
   line-height: 1.6;
-  color: var(--text);
+  color: var(--text-primary);
   margin-bottom: 1.5rem;
 }
 
