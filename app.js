@@ -719,7 +719,52 @@
 
 
 /* ─────────────────────────────────────────────
-   8. SMOOTH SECTION ENTRANCE via CSS class
+   8. CONTACT FORM (Formspree AJAX)
+   ───────────────────────────────────────────── */
+(function initContactForm() {
+  const form = document.getElementById('contactForm');
+  if (!form) return;
+  const submitBtn = document.getElementById('cfSubmit');
+  const status = document.getElementById('cfStatus');
+  const isZh = document.body.classList.contains('lang-zh');
+
+  const msg = {
+    sending: isZh ? '发送中…' : 'Sending…',
+    success: isZh ? '✓ 留言已发送，我会尽快回复您！' : '✓ Message sent — I will get back to you soon!',
+    error: isZh ? '✗ 发送失败，请稍后重试或直接发邮件。' : '✗ Something went wrong. Please try again or email me directly.',
+  };
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    submitBtn.disabled = true;
+    status.className = 'form-status';
+    status.textContent = msg.sending;
+
+    try {
+      const res = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { 'Accept': 'application/json' },
+      });
+      if (res.ok) {
+        status.classList.add('success');
+        status.textContent = msg.success;
+        form.reset();
+      } else {
+        throw new Error('Formspree error');
+      }
+    } catch {
+      status.classList.add('error');
+      status.textContent = msg.error;
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+})();
+
+
+/* ─────────────────────────────────────────────
+   9. SMOOTH SECTION ENTRANCE via CSS class
    ───────────────────────────────────────────── */
 (function sectionFadeIn() {
   const sections = document.querySelectorAll('section');

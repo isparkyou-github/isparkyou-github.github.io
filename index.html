@@ -780,6 +780,25 @@
         <div class="contact-value">linkedin.com/in/zhangsenye</div>
       </a>
     </div>
+
+    <form class="contact-form" id="contactForm" action="https://formspree.io/f/mykapvdo" method="POST">
+      <div class="form-row">
+        <div class="form-field">
+          <label for="cfName">Name</label>
+          <input type="text" id="cfName" name="name" placeholder="Your name" required />
+        </div>
+        <div class="form-field">
+          <label for="cfEmail">Email</label>
+          <input type="email" id="cfEmail" name="email" placeholder="you@example.com" required />
+        </div>
+      </div>
+      <div class="form-field">
+        <label for="cfMessage">Message</label>
+        <textarea id="cfMessage" name="message" rows="5" placeholder="Tell me about your project or opportunity..." required></textarea>
+      </div>
+      <button type="submit" class="btn-primary form-submit" id="cfSubmit">Send Message</button>
+      <p class="form-status" id="cfStatus" role="status"></p>
+    </form>
   </div>
 </section>
 
